@@ -1,7 +1,24 @@
 using System;
+using System.Collections;
+
+//The IAccount interface specifies what methods we want our account class to contain
+public interface IAccount
+{
+    void PayInFunds(decimal amount);
+    bool WithdrawFunds(decimal amount);
+    decimal GetBalance();
+    string RudeLetterString();
+    //decimal RipoffFee();
+}
+
+public interface IBank
+{
+    IAccount FindAccount(string name);
+    bool StoreAccount(IAccount account);
+}
 
 //This enumerator will hold the current state type of an account
-enum AccountState
+public enum AccountState
 {
     New,
     Active,
@@ -10,32 +27,22 @@ enum AccountState
     Closed
 };
 
-class BankingSystem
+/*Our abstract account class creates some methods used by all account class types, and defines some
+abstract methods that the account classes will implement differently*/
+public abstract class Account : IAccount
 {
-    //This structure will be the template for each account
-    struct Account
-    {
-        public AccountState State;
-        public string Name;
-        public string Address;
-        public int AccountNumber;
-        public decimal Balance;
-        public int Overdraft;
-    };
+    public AccountState State;
+    public string name;
+    public string address;
+    public int accountNumber;
+    protected decimal balance = 0;
+    public int overdraft;
 
-    //This constant is the max amount of customers the banking system can hold
-    const int MAX_CUST = 50;
 
-    //This method allows an account's name, address, and balance to be printed
-    static void PrintAccount(Account a)
-    {
-        Console.WriteLine("Name:" + a.Name);
-        Console.WriteLine("Address:" + a.Address);
-        Console.WriteLine("Balance:" + a.Balance);
-    }
-
-    static public decimal balance = 0;
-    static public bool WithdrawFunds (decimal amount)
+    //An abstract method will not be provided in this class, but will be provided in the child class
+    public abstract string RudeLetterString();
+   
+    public virtual bool WithdrawFunds(decimal amount)
     {
         if (balance < amount)
         {
@@ -44,57 +51,81 @@ class BankingSystem
         balance = balance - amount;
         return true;
     }
-    public void PayInFunds(decimal amount)
-    {
-        balance = balance + amount;
-    }
     public decimal GetBalance()
     {
         return balance;
     }
-
-
-
-    static void Main(string[] args)
+    public void PayInFunds(decimal amount)
     {
-        Console.WriteLine("yo");
+        balance = balance + amount;
+    }
 
-        //This declaration sets up an array called bank holding all the customers in the system
-        Account[] Bank = new Account[MAX_CUST];
-
-        /*These arrays hold the state, name, address, account numbers, balances, and overdraft fee amounts
-        of the customers in the banking system */
-        AccountState[] states = new AccountState[MAX_CUST];
-        String [] names = new string[MAX_CUST];
-        String [] addresses = new string[MAX_CUST];
-        int [] accountNos = new int[MAX_CUST];
-        decimal [] balances = new decimal[MAX_CUST];
-        int[] overdraft = new int[MAX_CUST];
-
-
-        //This creates an account for the banking system to hold
-        Account LukesAccount;
-        LukesAccount.State = AccountState.Active;
-        LukesAccount.Balance = 0;
-        LukesAccount.Name = "Luke";
-        LukesAccount.Address = "3070 Burning Tree, Garland TX";
-        LukesAccount.AccountNumber = 954345;
-        LukesAccount.Overdraft = 0;
-
-        //This assigns the created account structure into the first element of the bank array
-        Bank[0] = LukesAccount;
-
-        PrintAccount(LukesAccount);
-
-        if (WithdrawFunds(LukesAccount.Balance))
+    /*public bool StoreAccount(IAccount account)
+    {
+        int position = 0;
+        for (position = 0; position < ArrayBank.Length; position++)
         {
-            Console.WriteLine("Cash Withdrawn");
+            if (ArrayBank[position] == null)
+            {
+                ArrayBank[position] = account;
+                return true;
+            }
         }
-        else
-        {
-            Console.WriteLine("Insufficient Funds");
-        }
+        return false;
+    }*/
 
+    
+}
+
+
+public class CustomerAccount : Account
+{
+    public override string RudeLetterString()
+    {
+        return "You are overdrawn";
+    }
+
+
+}
+
+public class BabyAccount : Account
+{
+
+    public override bool WithdrawFunds(decimal amount)
+    {
+        if (amount > 10)
+        {
+            return false;
+        }
+        return base.WithdrawFunds(amount);
+    }
+    public override string RudeLetterString()
+    {
+        return "Tell daddy you are overdrawn";
+    }
+
+}
+
+
+class BankProgram
+    {
+        public static void Main()
+        {
+        /*Max customers in bank in constant form so it can be changed to alter
+        the amount of customers held easily*/
+        const int MAX_CUST = 100;
+
+        ArrayBank ourBank = new ArrayBank(100);
+
+
+        //This creates a unique identifier that will be our accounts unique ID
+        Guid g = Guid.NewGuid();
+        Console.WriteLine(g);
+
+
+
+
+       
     }
 }
 
